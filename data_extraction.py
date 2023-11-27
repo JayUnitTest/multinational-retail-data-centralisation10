@@ -20,20 +20,33 @@ class DataExtractor:
         except Exception as e:
             print(f"An error occurred during PDF extraction: {e}")
         
-        
-
-
 if __name__ == "__main__":
     
     data_extractor = DataExtractor()
+    
+    data_cleaner = DataCleaning()
     
     pdf_link = 'https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf'
 
     pdf_data = data_extractor.retrieve_pdf_data(pdf_link)
     
+    cleaned_pdf = data_cleaner.clean_card_details(pdf_data)
+    
     if pdf_data is not None:
         print(pdf_data)
+        print(pdf_data.info())
+        print(f"cleaned pdf{cleaned_pdf}")
         
+    connector =  DatabaseConnector()
+    local_creds = connector.read_db_creds("db_creds_local.yaml")
+    local_engine = connector.init_db_engine(local_creds)
+    local_engine.connect()
+    
+    try:
+        connector.upload_to_db(local_engine, cleaned_pdf, "dim_card_details")
+    except Exception as e:
+        print(f"failed to upload to db: {e}")
+    
     # connector = DatabaseConnector()
     # credentials = connector.read_db_creds("db_creds.yaml")
     # engine = connector.init_db_engine(credentials)

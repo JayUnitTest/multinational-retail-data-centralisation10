@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import re
+from datetime import datetime
 
 
 class DataCleaning:
@@ -65,3 +66,17 @@ class DataCleaning:
         df[column_name] = pd.to_datetime(df[column_name], errors="coerce")
         df.dropna(subset=column_name, how="any", inplace=True)
         return df
+    
+    # def check_for_expired_cards(self,column_name,df):
+    #     df[column_name] = pd.to_datetime(df[column_name], errors="coerce")
+    #     current_date = pd.to_datetime('now')
+    #     df['card_status'] = pd.cut(df[column_name], dtype=)
+        
+    
+    def clean_card_details(self, df):
+        self.clean_user_date_errors(df, 'date_payment_confirmed')
+        self.clean_missing_values_nan_nulls(df)
+        self.clean_duplicated_data(df, 'card_number')
+        self.clean_user_data_types_to_string(df, 'card_number')
+        return df
+        
