@@ -72,7 +72,6 @@ class DataCleaning:
     #     current_date = pd.to_datetime('now')
     #     df['card_status'] = pd.cut(df[column_name], dtype=)
         
-    
     def clean_card_details(self, df):
         self.clean_user_date_errors(df, 'date_payment_confirmed')
         self.clean_missing_values_nan_nulls(df)
@@ -80,3 +79,14 @@ class DataCleaning:
         self.clean_user_data_types_to_string(df, 'card_number')
         return df
         
+    def clean_store_data(self, df):
+        self.clean_missing_values_nan_nulls(df)
+        self.clean_user_date_errors(df, 'opening_date')
+        df['longitude'] = pd.to_numeric(df['longitude'], errors="coerce")
+        df['latitude'] = pd.to_numeric(df['latitude'], errors="coerce")
+        df['latitude'].fillna(df['latitude'].mean(), inplace=True)
+        df['longitude'].fillna(df['longitude'].mean(), inplace=True)
+        df['staff_numbers'] = df['staff_numbers'].apply(lambda x: re.sub(r'\D', '', str(x))) 
+        df['staff_numbers'] = df['staff_numbers'].astype(int)
+        df.drop(columns='lat', inplace=True)
+        return df
