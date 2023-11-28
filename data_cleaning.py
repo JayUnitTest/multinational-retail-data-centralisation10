@@ -90,3 +90,39 @@ class DataCleaning:
         df['staff_numbers'] = df['staff_numbers'].astype(int)
         df.drop(columns='lat', inplace=True)
         return df
+    
+    def convert_products_weights(self, df, column_name):
+        units_regex = r'(\d+\.\d+|\d+)(kg|g|ml)'
+        df[['weight', 'unit']] = df['weight'].str.extract(units_regex)
+        df['weight'].dropna(inplace = True)
+        df['weight'] = pd.to_numeric(df['weight'], errors='coerce').astype('float')
+        df[['weight', 'unit']] = df.apply(self.convert_units_to_kg, axis=1, result_type='expand')
+        print(df[['product_name', 'weight', 'unit']])
+        
+    def convert_units_to_kg(self, row):
+        if pd.notna(row['weight']):
+            if row['unit'] == 'kg':
+                return row['weight'], 'kg'
+            elif row['unit'] == 'g':
+                return row['weight'] / 1000, 'kg'
+            elif row['unit'] == 'ml':
+                return row['weight'] / 1000, 'kg'
+        return None, None
+    
+    def clean_products_data(self, df):
+        df.dropna(how='any', inplace = True)
+        df.drop(columns = 'Unnamed: 0', inplace = True)
+        self.clean_user_date_errors(df, 'date_added')
+        self.clean_duplicated_data(df, 'product_code')
+        df = df[['product_name', 'product_price', 'weight', 'unit', 'category', 'EAN', 'date_added', 'uuid', 'removed', 'product_code']] # done so that unit was placed next to weight 
+        return df
+    
+    def clean_orders_data(self, df):
+        df.drop(columns='first_name', inplace=True)
+        df.drop(columns='last_name', inplace = True)
+        df.drop(columns='1', inplace=True)
+        df.drop(columns='level_0', inplace=True)
+        df.dropna(inplace=True)
+        return df
+             
+        
