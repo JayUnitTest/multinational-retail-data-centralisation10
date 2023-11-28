@@ -70,6 +70,7 @@ class DataExtractor:
         df = pd.read_csv(extract)
         print(df)
         return df
+        
     
     def extract_orders_table(self):
         connector = DatabaseConnector()

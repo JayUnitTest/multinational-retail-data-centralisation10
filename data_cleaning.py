@@ -114,7 +114,7 @@ class DataCleaning:
         df.drop(columns = 'Unnamed: 0', inplace = True)
         self.clean_user_date_errors(df, 'date_added')
         self.clean_duplicated_data(df, 'product_code')
-        df = df[['product_name', 'product_price', 'weight', 'unit', 'category', 'EAN', 'date_added', 'uuid', 'removed', 'product_code']] # done so that unit was placed next to weight 
+        df = df[['product_name', 'product_price', 'weight', 'unit', 'category', 'EAN', 'date_added', 'uuid', 'removed', 'product_code']]
         return df
     
     def clean_orders_data(self, df):
@@ -124,5 +124,20 @@ class DataCleaning:
         df.drop(columns='level_0', inplace=True)
         df.dropna(inplace=True)
         return df
+    
+    def clean_date_times_s3(self, df):
+        df = pd.read_json(df, convert_dates={'timestamp' : 'datetime64[ns]'})
+        df['timestamp'] = pd.to_datetime(df['timestamp'], format='%H:%M:%S', errors= 'coerce')
+        df['timestamp'] = df['timestamp'].dt.time
+        df['year'] = df['year'].astype(str) 
+        df['month'] = df['month'].astype(str).str.zfill(2)
+        df['day'] = df['day'].astype(str).str.zfill(2) 
+        df['date'] = df['year'] + '-' + df['month'] + '-' + df['day']
+        self.clean_user_date_errors(df, 'date')
+        self.clean_missing_values_nan_nulls(df)
+        df['date'] = df['date'].dt.date
+        df = df[['date','timestamp', 'day', 'month', 'year','time_period', 'date_uuid']]
+        return df
+        
              
         
