@@ -3,3 +3,4 @@ db_creds_local.yaml
 __pycache__
 text_file.text
 date_details.json
+.vscode

@@ -22,7 +22,7 @@ class DataExtractor:
         except Exception as e:
             print(f"An error occurred during PDF extraction: {e}")
             
-    def api_key(self):
+    def _api_key(self):
         return {'x-api-key': 'yFBQbwXe9J3sd6zWVAMrK6lcxxr0q1lr2PT6DDMX'}
     
     def list_number_of_stores(self):
