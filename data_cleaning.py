@@ -5,7 +5,17 @@ from datetime import datetime
 
 
 class DataCleaning:
+    '''This class contains methods for cleaning and transforming data in a pandas DataFrame.'''
+    
     def clean_user_data(self, df):
+        """Cleans user data in the DataFrame.
+
+        Args:
+            df (pandas.DataFrame): The input DataFrame containing user data.
+
+        Returns:
+            pandas.DataFrame: The cleaned DataFrame.
+        """
         df = self.clean_user_date_errors(df, "date_of_birth")
         df = self.clean_user_date_errors(df, "join_date")
         df = self.clean_user_data_types_to_string(df, "first_name")
@@ -18,10 +28,28 @@ class DataCleaning:
         return df
 
     def clean_user_data_types_to_string(self, df, column_name):
+        """Converts the specified column in the DataFrame to string data type.
+
+        Args:
+            df (pandas.DataFrame): The input DataFrame.
+            column_name (str): The name of the column to convert.
+
+        Returns:
+            pandas.DataFrame: The DataFrame with the specified column converted to string.
+        """
         df[column_name] = df[column_name].astype("string")
         return df
 
     def valid_email_address(self, df, column_name):
+        """Validates email addresses in the specified column of the DataFrame.
+
+        Args:
+            df (pandas.DataFrame): The input DataFrame.
+            column_name (str): The name of the column containing email addresses.
+
+        Returns:
+            pandas.DataFrame: The DataFrame with valid email addresses.
+        """
         regex = re.compile(
             r"([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+"
         )
@@ -34,16 +62,42 @@ class DataCleaning:
         return df
 
     def clean_duplicated_data(self, df, column_name):
+        """Removes duplicated data in the specified column of the DataFrame.
+
+        Args:
+            df (pandas.DataFrame): The input DataFrame.
+            column_name (str): The name of the column containing duplicated data.
+
+        Returns:
+            pandas.DataFrame: The DataFrame with duplicated data removed.
+        """
         df[column_name] = df[column_name].drop_duplicates()
         return df
 
     def clean_missing_values_nan_nulls(self, df):
+        """Cleans missing values (NaN, NULL) in the DataFrame.
+
+        Args:
+            df (pandas.DataFrame): The input DataFrame.
+
+        Returns:
+            pandas.DataFrame: The DataFrame with missing values cleaned.
+        """
         df = df.fillna(np.nan)
         df = df.replace("NULL", np.nan)
         df = df.dropna()
         return df
 
     def clean_user_phone_numbers(self, df, column_name):
+        """Cleans and validates phone numbers in the specified column of the DataFrame.
+
+        Args:
+            df (pandas.DataFrame): The input DataFrame.
+            column_name (str): The name of the column containing phone numbers.
+
+        Returns:
+            pandas.DataFrame: The DataFrame with valid phone numbers.
+        """
         uk_regex_expression = "^(?:(?:\(?(?:0(?:0|11)\)?[\s-]?\(?|\+)44\)?[\s-]?(?:\(?0\)?[\s-]?)?)|(?:\(?0))(?:(?:\d{5}\)?[\s-]?\d{4,5})|(?:\d{4}\)?[\s-]?(?:\d{5}|\d{3}[\s-]?\d{3}))|(?:\d{3}\)?[\s-]?\d{3}[\s-]?\d{3,4})|(?:\d{2}\)?[\s-]?\d{4}[\s-]?\d{4}))(?:[\s-]?(?:x|ext\.?|\#)\d{3,4})?$"
         international_regex = r"^\+(?:[0-9] ?){6,14}[0-9]$"
         df.loc[
@@ -54,6 +108,15 @@ class DataCleaning:
         return df
 
     def clean_user_date_errors(self, df, column_name):
+        """Cleans date errors in the specified column of the DataFrame.
+
+        Args:
+            df (pandas.DataFrame): The input DataFrame.
+            column_name (str): The name of the column containing date values.
+
+        Returns:
+            pandas.DataFrame: The DataFrame with cleaned date errors.
+        """
         df[column_name] = pd.to_datetime(
             df[column_name], format="%Y-%m-%d", errors="ignore"
         )
@@ -73,6 +136,14 @@ class DataCleaning:
     #     df['card_status'] = pd.cut(df[column_name], dtype=)
         
     def clean_card_details(self, df):
+        """Cleans card details data in the DataFrame.
+
+        Args:
+            df (pandas.DataFrame): The input DataFrame containing card details.
+
+        Returns:
+            pandas.DataFrame: The cleaned DataFrame.
+        """
         self.clean_user_date_errors(df, 'date_payment_confirmed')
         self.clean_missing_values_nan_nulls(df)
         self.clean_duplicated_data(df, 'card_number')
@@ -80,6 +151,14 @@ class DataCleaning:
         return df
         
     def clean_store_data(self, df):
+        """cleans store data in the DataFrame
+        
+        Args:
+            df (pandas.DataFrame): The input DataFrame containing store data.
+        
+        Returns: 
+            pandas.DataFrame: The cleaned DataFrame.
+        """
         self.clean_missing_values_nan_nulls(df)
         self.clean_user_date_errors(df, 'opening_date')
         df['longitude'] = pd.to_numeric(df['longitude'], errors="coerce")
@@ -92,6 +171,15 @@ class DataCleaning:
         return df
     
     def convert_products_weights(self, df, column_name):
+        """Converts product weights to a consistent unit (kg).
+
+        Args:
+            df (pandas.DataFrame): The input DataFrame.
+            column_name (str): The name of the column containing product weights.
+
+        Returns:
+            None
+        """
         units_regex = r'(\d+\.\d+|\d+)(kg|g|ml)'
         df[['weight', 'unit']] = df['weight'].str.extract(units_regex)
         df['weight'].dropna(inplace = True)
@@ -100,6 +188,14 @@ class DataCleaning:
         print(df[['product_name', 'weight', 'unit']])
         
     def convert_units_to_kg(self, row):
+        """Converts individual units to kg.
+
+        Args:
+            row (pandas.Series): A row from the DataFrame.
+
+        Returns:
+            tuple or None: A tuple containing the converted weight and unit, or None if conversion is not possible.
+        """
         if pd.notna(row['weight']):
             if row['unit'] == 'kg':
                 return row['weight'], 'kg'
@@ -110,6 +206,14 @@ class DataCleaning:
         return None, None
     
     def clean_products_data(self, df):
+        """Cleans product data in the DataFrame.
+
+        Args:
+            df (pandas.DataFrame): The input DataFrame containing product data.
+
+        Returns:
+            pandas.DataFrame: The cleaned DataFrame.
+        """
         df.dropna(how='any', inplace = True)
         df.drop(columns = 'Unnamed: 0', inplace = True)
         self.clean_user_date_errors(df, 'date_added')
@@ -118,6 +222,14 @@ class DataCleaning:
         return df
     
     def clean_orders_data(self, df):
+        """Cleans orders data in the DataFrame.
+
+        Args:
+            df (pandas.DataFrame): The input DataFrame containing orders data.
+
+        Returns:
+            pandas.DataFrame: The cleaned DataFrame.
+        """
         df.drop(columns='first_name', inplace=True)
         df.drop(columns='last_name', inplace = True)
         df.drop(columns='1', inplace=True)
@@ -126,6 +238,14 @@ class DataCleaning:
         return df
     
     def clean_date_times_s3(self, df):
+        """Cleans date and time data in the DataFrame obtained from S3.
+
+        Args:
+            df (pandas.DataFrame): The input DataFrame containing date and time data.
+
+        Returns:
+            pandas.DataFrame: The cleaned DataFrame.
+        """
         df = pd.read_json(df, convert_dates={'timestamp' : 'datetime64[ns]'})
         df['timestamp'] = pd.to_datetime(df['timestamp'], format='%H:%M:%S', errors= 'coerce')
         df['timestamp'] = df['timestamp'].dt.time
