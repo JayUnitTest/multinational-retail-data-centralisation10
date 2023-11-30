@@ -49,7 +49,9 @@ This approach centralizes data from multiple origins, providing a cohesive found
 - YAML (library)
 
 To execute files from this project, run the following command in the terminal: 
-> python {filename.py}
+```
+python {filename.py}
+```
 
 The project utilizes function calls under the "if \_\_name\_\_ == '\_\_main\_\_'" block. Alternatively, you can create a separate main file to invoke specific functions like database uploads and data extraction.
 
