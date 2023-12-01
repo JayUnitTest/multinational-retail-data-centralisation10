@@ -28,3 +28,15 @@ FROM dim_store_details
 GROUP BY locality
 ORDER BY total_no_stores DESC
 LIMIT 7
+
+/*
+QUERY RESULTS: 
+"locality"	"total_no_stores"
+"Chapletown"	14
+"Belper"	    13
+"Exeter"	    11
+"Bushey"	    10
+"Arbroath"	    10
+"High Wycombe"	10
+"Rutherglen"	 9
+*/
