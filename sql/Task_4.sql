@@ -1,3 +1,5 @@
+/*How many sales are coming from online?*/
+
 SELECT COUNT(orders_table.product_quantity) as number_of_sales,
 		SUM (orders_table.product_quantity) as product_quantity_count,
 		CASE 
