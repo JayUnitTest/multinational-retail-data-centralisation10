@@ -1,41 +1,53 @@
-WITH cte 
-     AS (SELECT Extract(hour FROM Cast(timestamp AS TIME))   AS Hour, 
-                Extract(minute FROM Cast(timestamp AS TIME)) AS Minute, 
-                Extract(second FROM Cast(timestamp AS TIME)) AS Seconds, 
-                day, 
-                month, 
-                year, 
-                date_uuid 
-         FROM   dim_date_times), 
-     new_timestamp 
-     AS (SELECT cte.year, 
-                Make_timestamp(Cast(cte.year AS INT), Cast(cte.month AS INT), 
-                Cast( 
-                cte.day AS INT), Cast(cte.hour AS INT), Cast(cte.minute AS INT), 
-                Cast(cte.seconds AS FLOAT)) AS combined_timestamp, 
-                cte.date_uuid 
-         FROM   cte), 
-     time_difference 
-     AS (SELECT new_timestamp.year, 
-                Lead(new_timestamp.combined_timestamp) 
-                  OVER ( 
-                    ORDER BY new_timestamp.combined_timestamp) - 
-                new_timestamp.combined_timestamp AS difference 
-         FROM   dim_date_times 
-                JOIN new_timestamp 
-                  ON dim_date_times.date_uuid = new_timestamp.date_uuid), 
-     yearly_average 
-     AS (SELECT time_difference.year, 
-                Avg(difference) AS year_average 
-         FROM   time_difference 
-         GROUP  BY year 
-         ORDER  BY year_average DESC) 
-SELECT yearly_average.year, 
-       Concat('Hours: ', Extract(hour FROM year_average), ' ', 'Minutes: ', 
-       Extract( 
-       minute FROM year_average), ' ', 'Seconds: ', Extract( 
-       second FROM year_average), 
-       ' ') AS actual_time_taken 
-FROM   yearly_average; 
+/*How quickly is the company making sales*/
 
-/*Havent done milliseconds yet*/
+
+WITH cte AS 
+(
+		SELECT
+				EXTRACT(HOUR FROM CAST(timestamp AS time)) AS Hours,
+				EXTRACT(MINUTE FROM CAST(timestamp AS time)) AS Minutes,
+				EXTRACT(SECOND FROM CAST(timestamp AS time)) AS Seconds,
+				day,
+				month,
+				year,
+				date_uuid
+		FROM dim_date_times
+),
+new_timestamp AS (
+		SELECT
+			MAKE_TIMESTAMP(
+			CAST(cte.year AS int),
+			CAST(cte.month AS int),
+			CAST(cte.day AS int),
+			CAST(cte.Hours AS int),
+			CAST(cte.Minutes AS int),
+			CAST(cte.Seconds AS float)
+			) AS combined_timestamp,
+			cte.year,
+			cte.date_uuid
+	FROM cte
+),
+time_difference AS 
+(
+		SELECT new_timestamp.year,
+				LEAD(new_timestamp.combined_timestamp) OVER (ORDER BY new_timestamp.combined_timestamp) - new_timestamp.combined_timestamp AS time_diff
+		FROM dim_date_times
+		JOIN new_timestamp ON dim_date_times.date_uuid = new_timestamp.date_uuid
+),
+yearly_average AS 
+(
+		SELECT time_difference.year, 
+				AVG(time_diff) AS year_average
+		FROM time_difference
+		GROUP BY time_difference.year
+		ORDER BY year_average DESC
+
+)
+	SELECT yearly_average.year,
+		CONCAT('Hours: ', EXTRACT(HOUR FROM year_average), ' ',
+			   'Minutes; ', EXTRACT(MINUTE FROM year_average), ' ',
+			   'Seconds: ', FLOOR(EXTRACT(SECOND FROM year_average)), ' ',
+			   'Milliseconds: ', EXTRACT(SECOND FROM year_average) - FLOOR(EXTRACT(SECOND FROM year_average)), ' '
+			  ) AS actual_time_taken
+		FROM yearly_average
+	
